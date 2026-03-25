@@ -1,0 +1,163 @@
+<body>
+
+<nav>
+  <h2>Veloura</h2>
+  <div>
+    <a href="#home">Home</a>
+    <a href="#projects">Projects</a>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-content">
+    <h1>Aditya</h1>
+    <p>Next-Gen Experience Architect</p>
+    <button class="btn">Start Project</button>
+  </div>
+</section>
+
+<section>
+  <h2>About</h2>
+  <p>Building cinematic, high-performance digital worlds.</p>
+</section>
+
+<section id="projects">
+  <h2>Projects</h2>
+  <div class="projects">
+    <div class="card">AI Systems</div>
+    <div class="card">3D Interfaces</div>
+    <div class="card">Automation</div>
+  </div>
+</section>
+
+<section>
+  <h2>Contact</h2>
+  <p>adix99ff@gmail.com</p>
+</section>
+
+<canvas id="bg"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+/* =======================
+   SCENE SETUP (CLEAN)
+======================= */
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  70,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  2000
+);
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById("bg"),
+  alpha: true,
+  antialias: true
+});
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+/* =======================
+   EARTH (HIGH QUALITY)
+======================= */
+const loader = new THREE.TextureLoader();
+
+const earth = new THREE.Mesh(
+  new THREE.SphereGeometry(5, 128, 128),
+  new THREE.MeshStandardMaterial({
+    map: loader.load("https://threejs.org/examples/textures/earth_atmos_2048.jpg"),
+    roughness: 0.9,
+    metalness: 0.1
+  })
+);
+
+scene.add(earth);
+
+/* ATMOSPHERE */
+const glow = new THREE.Mesh(
+  new THREE.SphereGeometry(5.3, 128, 128),
+  new THREE.MeshBasicMaterial({
+    color: 0x00f5ff,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.BackSide
+  })
+);
+
+scene.add(glow);
+
+/* LIGHTS */
+scene.add(new THREE.PointLight(0xffffff, 2));
+scene.add(new THREE.AmbientLight(0x222222));
+
+/* =======================
+   STARS (OPTIMIZED)
+======================= */
+const starGeometry = new THREE.BufferGeometry();
+const starCount = 3000;
+
+const starPositions = [];
+
+for (let i = 0; i < starCount; i++) {
+  starPositions.push(
+    (Math.random() - 0.5) * 1000,
+    (Math.random() - 0.5) * 1000,
+    (Math.random() - 0.5) * 1000
+  );
+}
+
+starGeometry.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(starPositions, 3)
+);
+
+const stars = new THREE.Points(
+  starGeometry,
+  new THREE.PointsMaterial({ color: 0xffffff, size: 0.5 })
+);
+
+scene.add(stars);
+
+/* =======================
+   CAMERA POSITION
+======================= */
+camera.position.z = 15;
+
+/* =======================
+   SCROLL ANIMATION (CORE)
+======================= */
+let sections = document.querySelectorAll("section");
+
+window.addEventListener("scroll", () => {
+  const scrollY = window.scrollY;
+
+  camera.position.z = 15 + scrollY * 0.01;
+  earth.rotation.y = scrollY * 0.0007;
+
+  sections.forEach(sec => {
+    if (sec.getBoundingClientRect().top < window.innerHeight - 100) {
+      sec.classList.add("show");
+    }
+  });
+});
+
+/* =======================
+   ANIMATION LOOP
+======================= */
+function animate() {
+  requestAnimationFrame(animate);
+
+  earth.rotation.y += 0.001;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
